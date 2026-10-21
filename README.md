@@ -58,8 +58,6 @@ For digit matching, hits are Binomial(*n*, 1/10) with *n* = 500, 490 or 268, and
 - **What went wrong in 2012.** The original analysis computed p-values as `2*pnorm(-abs(cr))`, the normal approximation. That is the source of the apparent anomaly.
 - **Unrecorded source.** The source of the two runs in `other_runs.npz` was not recorded. They are included for completeness and fit the binomial as well as the rest.
 
-The original `.RData` files (about 460 MB) are available from the author.
-
 ## Reproducing the results
 
 Python 3.9 or later.
