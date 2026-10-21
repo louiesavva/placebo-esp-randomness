@@ -13,8 +13,9 @@ license:
 abstract: >-
   Hit counts for 38,016,682 placebo ESP experiments of Spencer-Brown's
   morning-afternoon design using atmospheric-noise random numbers from
-  random.org, with smaller pseudo-random and hardware series and two
-  digit-matching series, plus code for every table in "Anomalous
+  random.org, with smaller pseudo-random and hardware series, two
+  digit-matching series and a Zener-card series of 473,594 experiments,
+  plus code for every table in "Anomalous
   Significance Revisited" and "Too Many Miracles".
 keywords:
   - binomial distribution

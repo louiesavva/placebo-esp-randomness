@@ -14,6 +14,7 @@ Writes results/extra_checks.md. Needs numpy and scipy; run after extract.py.
    kurtosis of both scores alike, by 3 x (relative variance of the variance).
 3. Upper and lower tails of the difference separately.
 4. The +6 displacement fit of the random.org digit series, with its Bonferroni threshold.
+5. Bit layout and runs in the two daily random.org files whose bits survive.
 """
 import os
 import numpy as np
@@ -117,6 +118,27 @@ md += ['## 4. random.org digits, +6 displacement', '',
        f'chi-square {X2:.1f} on {df} df, p = {pv:.5f}; Bonferroni threshold for 35 fits = {0.05 / 35:.5f}.',
        f'Mean {x.mean():.4f} (expected {n * p}), variance {x.var():.4f} (expected {n * p * (1 - p):.1f}).',
        f'First and second halves of the series: p = {ph[0]:.3f} and {ph[1]:.3f}.', '']
+
+# ---- 5. bit layout and runs, from two daily files ---------------------------------
+files = open(os.path.join(DATA, 'random_org_files.txt')).read().split()
+md += ['## 5. Bit layout and runs', '',
+       'The bits of two daily random.org files survive in October 2012 workspaces (8,388,500 used from each). '
+       'Taken 500 at a time in the order they were read, the first 250 as morning and the next 250 as afternoon, '
+       'they reproduce the corresponding experiments of the main series (counted from 0). Runs and lag-1 '
+       'correlation test for dependence between successive bits.', '',
+       '| day | experiments | reproduced exactly | proportion of ones | runs | expected | z | lag-1 correlation (SE) |',
+       '|---|---|---|---|---|---|---|---|']
+for day in ('2012-06-17', '2012-08-04'):
+    bz = load(f'random_org_{day}_bits.npz')
+    bits = np.unpackbits(bz['bits'])[:int(bz['n_bits'])].astype(np.int64)
+    k = files.index(f'{day}.txt') * 16777
+    blocks = bits.reshape(16777, 2, 250).sum(axis=2)
+    ok = np.array_equal(blocks[:, 0], m[k:k + 16777]) and np.array_equal(blocks[:, 1], a[k:k + 16777])
+    nb = len(bits); runs = int((bits[1:] != bits[:-1]).sum()) + 1
+    er = 1 + (nb - 1) / 2; x = 2.0 * bits - 1
+    md.append(f'| {day} | {k:,} to {k + 16776:,} | {ok} | {bits.mean():.5f} | {runs:,} | {er:,.0f} | '
+              f'{(runs - er) / np.sqrt((nb - 1) / 4):+.2f} | {(x[1:] * x[:-1]).mean():+.5f} ({1 / np.sqrt(nb):.5f}) |')
+md += ['']
 
 with open(os.path.join(OUT, 'extra_checks.md'), 'w') as fh:
     fh.write('\n'.join(md) + '\n')

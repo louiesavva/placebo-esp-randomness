@@ -16,9 +16,10 @@ code/
   analyse.py         data/*.npz  ->  results/ (every table except the Iversen simulation)
   extra_checks.py    follow-up checks on the main series  ->  results/extra_checks.md
   iversen_check.py   simulation of the Iversen et al. (1971) test battery
+  zener.py           the Zener-card series  ->  results/zener.md
   figure1.py         Figure 1 (black and white): error of the normal approximations by threshold
   find_rdata.py      utility used to search the author's disks for the original files
-data/                hit counts per experiment, unsigned 8-bit, numpy .npz (67 MB)
+data/                hit counts per experiment, unsigned 8-bit, numpy .npz (about 70 MB)
 results/             output of the scripts above
 ```
 
@@ -32,8 +33,12 @@ results/             output of the scripts above
 | `random_org_digits.npz` | random.org digits | random.org | digit matching, 268 pairs, p = 1/10, displacements +1 to +7 and -1 to -7 | 1,108,074 | `straight`, `plus1`..`plus7`, `minus1`..`minus7` | `randorgorigA.RData` | Example 3 |
 | `random_org_125.npz` | Short series | random.org | morning-afternoon, 125 + 125 | 2,266,000 | hits in each half (of 125) | `randmorn.RData` | not used |
 | `other_runs.npz` | Unlabelled runs | not recorded | morning-afternoon, 250 + 250 | 1,000,000 and 255,732 | `mcr_*`, `aao1rng_*` | `mcr.RData`, `aao1rng.RData` | not used |
+| `random_org_zener.npz` | Zener cards | random.org (the same 2,266 days, binary files) | 625 trials (25 runs of 25), guess and target each one of five symbols, p = 1/5 | 473,594 | `hits` (of 625) | `rhine1.RData` (2013) | not used |
+| `random_org_2012-06-17_bits.npz`, `random_org_2012-08-04_bits.npz` | Raw bits | random.org | the bits of two days of the main series, as divided into experiments | 2 × 16,777 | `bits` (packed), `n_bits` | `x.RData`, `rled.RData` | not used |
 
-`random_org_files.txt` lists the 2,266 daily random.org files used by the main series, 12 March 2006 to 4 August 2012, in order. Each file supplied 8,388,608 random bits, divided into 16,777 blocks of 500: one bit per trial (250 morning, 250 afternoon), serving as the hit indicator. This is equivalent to matching a random target with a random guess, since the match of two independent fair bits is itself a fair bit. The remaining 108 bits of each file were not used. Experiment *i* comes from file *i* // 16,777. The script that read the files was not saved with the analysis workspaces, so the order in which bits were taken from each byte is not recorded; under the null hypothesis it does not affect the distribution of hit counts.
+`random_org_files.txt` lists the 2,266 daily random.org files used by the main series, 12 March 2006 to 4 August 2012, in order. Each file supplied 8,388,608 random bits, divided into 16,777 blocks of 500: one bit per trial (250 morning, 250 afternoon), serving as the hit indicator. This is equivalent to matching a random target with a random guess, since the match of two independent fair bits is itself a fair bit. The remaining 108 bits of each file were not used. Experiment *i* comes from file *i* // 16,777. The bits of two of these days (17 June and 4 August 2012) survive in October 2012 workspaces, already divided into experiments: taken 500 at a time, the first 250 as morning and the next 250 as afternoon, they reproduce those days' experiments exactly (`results/extra_checks.md`, section 5). The script that read the files was not saved, so the order in which bits were taken from each byte is not recorded; under the null hypothesis it does not affect the distribution of hit counts. random.org still distributes its daily archive files (by subscription, or free via BitTorrent), so comparing one of the two surviving days with its archive file would settle the bit order and allow the whole series to be rebuilt from public data.
+
+The Zener-card series reread the same 2,266 days from random.org's binary files. Each file was read as 262,144 32-bit integers, each reduced modulo 5 to one of five symbols; trial *j* matched symbol *j* (the guess) against symbol *j* + 131,072 (the target). The first 447 pairs of each file were not used, leaving 209 experiments of 625 trials. `random_org_zener_files.txt` lists the files in the order they were processed: experiment *i* comes from line *i* // 209 + 1. Reducing a 32-bit integer modulo 5 makes one symbol more likely than the others by about one part in 860 million, which is negligible.
 
 Load any series with numpy:
 
@@ -56,7 +61,8 @@ For digit matching, hits are Binomial(*n*, 1/10) with *n* = 500, 490 or 268, and
 - **How the counts were recovered.** The original R workspaces stored critical ratios rather than hit counts. `extract.py` converts them back to whole-number counts and stops if any value does not convert exactly.
 - **Where the main series comes from.** `rand1.RData`. An older copy of the same experiments, `Spencp.RData`, has 1,367 damaged values (0.004% of experiments), in three blocks of about a thousand experiments, probably caused by memory or disk errors. It is used only for the list of random.org files and as a cross-check (its undamaged values agree exactly), and it is why counts in the 2012 analysis differ from Table 1 by up to six.
 - **What went wrong in 2012.** The original analysis computed p-values as `2*pnorm(-abs(cr))`, the normal approximation. That is the source of the apparent anomaly.
-- **Unrecorded source.** The source of the two runs in `other_runs.npz` was not recorded. They are included for completeness and fit the binomial as well as the rest.
+- **Records from 2012.** A workspace saved in October 2012 holds frequency tables of morning hits, afternoon hits and their difference for all 38,016,682 experiments; they agree exactly with `data/` (checked by `extract.py`).
+- **Unrecorded source.** The source of the two runs in `other_runs.npz` was not recorded; `aao1rng` used a random number generator on a computer the author had at the time. They are included for completeness and fit the binomial as well as the rest.
 
 ## Reproducing the results
 
@@ -68,6 +74,7 @@ python code/analyse.py                    # a minute or two; writes results/summ
 python code/extra_checks.py               # writes results/extra_checks.md
 python code/iversen_check.py 20000 10000  # about 25 minutes; results/iversen_battery.txt
 python code/figure1.py                    # results/figure1.png and figure1.pdf (needs matplotlib)
+python code/zener.py                      # results/zener.md
 ```
 
 To rebuild `data/` from the original workspaces: `python code/extract.py /folder/with/RData/files`.
@@ -82,6 +89,7 @@ Full tables are in `results/summary.md` and `results/extra_checks.md`.
 - **Main series, against the normal approximation.** Errors run in both directions: 10% too few extremes predicted at |CR| >= 2.5, 13% too many at 2.6. Roughly every 0.85 in the threshold the error jumps from negative to positive, because the lattice of possible CRs (spacing 0.0894) drifts against a 0.1 grid of thresholds; between the jumps it drifts back down through zero.
 - **Every source and design.** The main series fits the exact binomial closely, and so do nearly all the others: variances within 0.3%, counts of |CR| >= 3 within 3%. Three of 35 chi-square fits give p < .05 (1.75 expected). One exploratory comparison, the +6 displacement of the random.org digits, departs significantly (p = .001, surviving a Bonferroni correction for 35 fits); it is not concentrated in the tails and remains unexplained.
 - **Digit matching (p = 1/10).** The normal curve badly undercounts the upper tail. At CR >= 3.5 the Entropy Key gave 461 experiments (exact 455, normal 233) and the random.org digits 835 (exact 832, normal 258).
+- **Zener cards (p = 1/5, 625 trials).** The fit to the exact binomial is good (chi-square p = .67). Here the standard deviation is exactly 10, so every critical-ratio threshold on a 0.1 grid falls on a possible score and the plain normal curve always predicts too few extremes. The exact binomial expects 12% more than the normal curve at |CR| >= 2, 18% more at 3 and 23% more at 3.5, and the observed counts follow the exact values. In the upper tail, the direction an ESP test looks for, 201 experiments reached CR >= 3.5 (exact 189, normal 110).
 - **Does the standard error vary?** No. The daily variances are exactly as dispersed as chance predicts (p = .49), and the kurtosis of the total score limits any experiment-to-experiment variation in the standard error to about 1%. The difference score shows a small central excess (z = 3.0 within one hit of *M* = *A*) not shared by the total score; it is reported in `results/extra_checks.md`.
 - **Iversen et al. (1971).** Their test battery is well calibrated under ideal randomness. Their dice (16 extreme scores of 267, 12.3 expected, P = .21) and pseudo-random series (5, 3.11 expected, P = .22) are within chance. Only the RAND digits are unusual (10, P = .003). Probabilities come from 20,000 simulated 100-block data sets and 10,000 simulated dice sets, with exact 95% intervals in the output.
 

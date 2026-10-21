@@ -65,3 +65,12 @@ chi-square 78.5 on 44 df, p = 0.00106; Bonferroni threshold for 35 fits = 0.0014
 Mean 26.8057 (expected 26.8), variance 24.1046 (expected 24.1).
 First and second halves of the series: p = 0.003 and 0.096.
 
+## 5. Bit layout and runs
+
+The bits of two daily random.org files survive in October 2012 workspaces (8,388,500 used from each). Taken 500 at a time in the order they were read, the first 250 as morning and the next 250 as afternoon, they reproduce the corresponding experiments of the main series (counted from 0). Runs and lag-1 correlation test for dependence between successive bits.
+
+| day | experiments | reproduced exactly | proportion of ones | runs | expected | z | lag-1 correlation (SE) |
+|---|---|---|---|---|---|---|---|
+| 2012-06-17 | 37,194,609 to 37,211,385 | True | 0.49997 | 4,195,568 | 4,194,250 | +0.91 | -0.00031 (0.00035) |
+| 2012-08-04 | 37,999,905 to 38,016,681 | True | 0.50025 | 4,195,136 | 4,194,250 | +0.61 | -0.00021 (0.00035) |
+

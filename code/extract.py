@@ -11,6 +11,8 @@ Expects the original file names (as stored in Google Drive, folder "RData"):
     randorgorigA.RData               random.org digit matching, 268 pairs (Example 3)
     randmorn.RData                   random.org morning-afternoon, 125 + 125 trials
     mcr.RData, aao1rng.RData         two further morning-afternoon runs (source not recorded)
+    rhine1.RData                     random.org Zener-card series, 625 trials, p = 1/5 (2013)
+    x.RData, rled.RData, pppv1.RData October 2012 workspaces used as provenance records
 
 Writes to data/ (counts of hits per experiment, unsigned 8-bit, compressed):
     random_org_main_morning.npz, random_org_main_afternoon.npz
@@ -21,6 +23,10 @@ Writes to data/ (counts of hits per experiment, unsigned 8-bit, compressed):
     random_org_digits.npz    straight, plus1..plus7, minus1..minus7 (of 268): digit matches, p = 1/10
     random_org_125.npz       morning, afternoon (hits out of 125 each)
     other_runs.npz           mcr_morning, mcr_afternoon, aao1rng_morning, aao1rng_afternoon (of 250)
+    random_org_zener.npz     hits (of 625), Zener symbols, p = 1/5, 473,594 experiments
+    random_org_zener_files.txt  the 2,266 daily random.org files in the order processed (209 experiments each)
+    random_org_2012-06-17_bits.npz, random_org_2012-08-04_bits.npz
+                             the 8,388,500 bits used from each of two daily files, as divided into experiments
 """
 import os, sys
 import numpy as np
@@ -116,4 +122,38 @@ for fname, key in (('mcr.RData', 'mcr'), ('aao1rng.RData', 'aao1rng')):
     o[f'{key}_morning'] = x1.astype(np.uint8); o[f'{key}_afternoon'] = x2.astype(np.uint8)
     report(key, x1)
 np.savez_compressed(os.path.join(OUT, 'other_runs.npz'), **o)
+
+# ---- random.org Zener-card series (2013) -------------------------------------------
+print('random.org Zener-card series')
+zn = load(path('rhine1.RData'), wanted={'dev', 'filenames'})
+z = zn['dev']; assert np.all(z == np.round(z)) and len(z) == 2266 * 209
+z = z.astype(np.int64)
+np.savez_compressed(os.path.join(OUT, 'random_org_zener.npz'), hits=z.astype(np.uint8))
+_, codes, levels = zn['filenames']
+with open(os.path.join(OUT, 'random_org_zener_files.txt'), 'w') as fh:     # processing order, dates only
+    fh.write('\n'.join(os.path.basename(levels[c - 1]) for c in codes) + '\n')
+report('hits of 625', z)
+
+# ---- provenance records (2012) -----------------------------------------------------
+# x.RData and rled.RData each hold the raw bits of one daily random.org file (17 June and
+# 4 August 2012) as they were divided into experiments; pppv1.RData holds frequency
+# tables of the whole main series.
+print('provenance records')
+for fname, day in (('x.RData', '2012-06-17'), ('rled.RData', '2012-08-04')):
+    xr = load(path(fname), wanted={'d[0]', 'd[1]', 'd[2]'})
+    bits, exp_no, half = (xr['d'][1][k] for k in range(3))
+    assert np.array_equal(exp_no, np.repeat(np.arange(1, 16778), 500))
+    assert np.array_equal(half, np.tile(np.repeat([1, 2], 250), 16777))
+    np.savez_compressed(os.path.join(OUT, f'random_org_{day}_bits.npz'),
+                        bits=np.packbits(bits.astype(np.uint8)), n_bits=len(bits))
+    k = files.index(f'{day}.txt') * 16777
+    blocks = bits.reshape(16777, 2, 250).sum(axis=2)
+    print(f'  {day}: {len(bits):,} bits, 500 consecutive bits per experiment (250 morning, then 250 afternoon); '
+          f'counts equal experiments {k:,} to {k + 16776:,} of the main series (from 0): '
+          f'{np.array_equal(blocks[:, 0], m[k:k + 16777]) and np.array_equal(blocks[:, 1], a[k:k + 16777])}')
+pp = load(path('pppv1.RData'), wanted={'a', 'm', 't', 'n'})
+same = int(pp['n'][0]) == len(m)
+for key, score in (('m', m - 125), ('a', a - 125), ('t', m - a)):
+    same &= np.array_equal(np.unique(score, return_counts=True)[1], pp[key])
+print(f'  October 2012 frequency tables of morning, afternoon and morning minus afternoon match the data: {same}')
 print('done')
