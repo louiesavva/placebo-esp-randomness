@@ -28,7 +28,7 @@ results/             output of the scripts above
 |---|---|---|---|---|---|---|---|
 | `random_org_main_morning.npz`, `random_org_main_afternoon.npz` | Main series | random.org (atmospheric noise) | Spencer-Brown's morning-afternoon: 250 + 250 binary trials, p = 1/2 | 38,016,682 | hits in each half (of 250) | `rand1.RData` (checked against `Spencp.RData`) | Example 1B |
 | `prng.npz` | Pseudo-random | Mersenne Twister in R | morning-afternoon, 250 + 250 | 1,000,004 | hits in each half | `prng.RData` | Example 1A |
-| `entropy_key_digits.npz` | Hardware | Entropy Key (avalanche noise, read from `/dev/random`) | Spencer-Brown's digit matching: 500 pairs, p = 1/10; +1 and -1 displacements of 490 pairs | 1,000,000 | `straight`, `plus1`, `minus1` | `mcrx.RData` | Example 2 |
+| `entropy_key_digits.npz` | Hardware | Simtec Electronics Entropy Key (USB hardware generator using avalanche noise, read from `/dev/random`) | Spencer-Brown's digit matching: 500 pairs, p = 1/10; +1 and -1 displacements of 490 pairs | 1,000,000 | `straight`, `plus1`, `minus1` | `mcrx.RData` | Example 2 |
 | `random_org_digits.npz` | random.org digits | random.org | digit matching, 268 pairs, p = 1/10, displacements +1 to +7 and -1 to -7 | 1,108,074 | `straight`, `plus1`..`plus7`, `minus1`..`minus7` | `randorgorigA.RData` | Example 3 |
 | `random_org_125.npz` | Short series | random.org | morning-afternoon, 125 + 125 | 2,266,000 | hits in each half (of 125) | `randmorn.RData` | not used |
 | `other_runs.npz` | Unlabelled runs | not recorded | morning-afternoon, 250 + 250 | 1,000,000 and 255,732 | `mcr_*`, `aao1rng_*` | `mcr.RData`, `aao1rng.RData` | not used |
