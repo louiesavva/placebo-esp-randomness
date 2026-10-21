@@ -86,6 +86,12 @@ Full tables are in `results/summary.md` and `results/extra_checks.md`.
 - **Does the standard error vary?** No. The daily variances are exactly as dispersed as chance predicts (p = .49), and the kurtosis of the total score limits any experiment-to-experiment variation in the standard error to about 1%. The difference score shows a small central excess (z = 3.0 within one hit of *M* = *A*) not shared by the total score; it is reported in `results/extra_checks.md`.
 - **Iversen et al. (1971).** Their test battery is well calibrated under ideal randomness. Their dice (16 extreme scores, 12.5 expected, P = .21) and pseudo-random series (5, 3.15 expected, P = .22) are within chance. Only the RAND digits are unusual (10, P = .004).
 
+## Licence and citation
+
+Code (`code/`): MIT licence, see `LICENSE`. Data and results (`data/`, `results/`): CC BY 4.0, see `LICENSE-DATA`.
+
+Please cite as: Savva, L. (2026). *Placebo ESP experiments: data and code* [Data set]. https://github.com/louiesavva/placebo-esp-randomness
+
 ## Use of AI tools
 
 The re-analysis, the code and the drafting of both papers were carried out with the assistance of Claude (Anthropic). The author directed the work and supplied the original data.

@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "If you use these data or code, please cite them as below."
+title: "Placebo ESP experiments: data and code"
+type: dataset
+authors:
+  - family-names: Savva
+    given-names: Louie
+date-released: 2026-10-21
+repository-code: "https://github.com/louiesavva/placebo-esp-randomness"
+license:
+  - MIT
+  - CC-BY-4.0
+abstract: >-
+  Hit counts for 38,016,682 placebo ESP experiments of Spencer-Brown's
+  morning-afternoon design using atmospheric-noise random numbers from
+  random.org, with smaller pseudo-random and hardware series and two
+  digit-matching series, plus code for every table in "Anomalous
+  Significance Revisited" and "Too Many Miracles".
+keywords:
+  - binomial distribution
+  - normal approximation
+  - random number generators
+  - parapsychology
+  - placebo experiments
