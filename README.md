@@ -16,6 +16,7 @@ code/
   analyse.py         data/*.npz  ->  results/ (every table except the Iversen simulation)
   extra_checks.py    follow-up checks on the main series  ->  results/extra_checks.md
   iversen_check.py   simulation of the Iversen et al. (1971) test battery
+  figure1.py         Figure 1 (black and white): error of the normal approximations by threshold
   find_rdata.py      utility used to search the author's disks for the original files
 data/                hit counts per experiment, unsigned 8-bit, numpy .npz (67 MB)
 results/             output of the scripts above
@@ -69,6 +70,7 @@ pip install -r requirements.txt
 python code/analyse.py                    # a minute or two; writes results/summary.md and CSVs
 python code/extra_checks.py               # writes results/extra_checks.md
 python code/iversen_check.py 2000 1000    # about 3 minutes; results/iversen_battery.txt
+python code/figure1.py                    # results/figure1.png and figure1.pdf (needs matplotlib)
 ```
 
 To rebuild `data/` from the original workspaces: `python code/extract.py /folder/with/RData/files`.
