@@ -17,9 +17,11 @@ code/
   extra_checks.py    follow-up checks on the main series  ->  results/extra_checks.md
   iversen_check.py   simulation of the Iversen et al. (1971) test battery
   zener.py           the Zener-card series  ->  results/zener.md
+  make_rdata.R       data/*.npz  ->  data/placebo_esp.RData (the whole data set as one R file)
+  check_rdata.py     confirms the R file holds exactly the same values as the .npz files
   figure1.py         Figure 1 (black and white): error of the normal approximations by threshold
   find_rdata.py      utility used to search the author's disks for the original files
-data/                hit counts per experiment, unsigned 8-bit, numpy .npz (about 70 MB)
+data/                hit counts per experiment: numpy .npz files (about 70 MB) and the same data as one R file
 results/             output of the scripts above
 ```
 
@@ -39,6 +41,16 @@ results/             output of the scripts above
 `random_org_files.txt` lists the 2,266 daily random.org files used by the main series, 12 March 2006 to 4 August 2012, in order. Each file supplied 8,388,608 random bits, divided into 16,777 blocks of 500: one bit per trial (250 morning, 250 afternoon), serving as the hit indicator. This is equivalent to matching a random target with a random guess, since the match of two independent fair bits is itself a fair bit. The remaining 108 bits of each file were not used. Experiment *i* comes from file *i* // 16,777. The bits of two of these days (17 June and 4 August 2012) survive in October 2012 workspaces, already divided into experiments: taken 500 at a time, the first 250 as morning and the next 250 as afternoon, they reproduce those days' experiments exactly (`results/extra_checks.md`, section 5). The script that read the files was not saved, so the order in which bits were taken from each byte is not recorded; under the null hypothesis it does not affect the distribution of hit counts. random.org still distributes its daily archive files (by subscription, or free via BitTorrent), so comparing one of the two surviving days with its archive file would settle the bit order and allow the whole series to be rebuilt from public data.
 
 The Zener-card series reread the same 2,266 days from random.org's binary files. Each file was read as 262,144 32-bit integers, each reduced modulo 5 to one of five symbols; trial *j* matched symbol *j* (the guess) against symbol *j* + 131,072 (the target). The first 447 pairs of each file were not used, leaving 209 experiments of 625 trials. `random_org_zener_files.txt` lists the files in the order they were processed: experiment *i* comes from line *i* // 209 + 1. Reducing a 32-bit integer modulo 5 makes one symbol more likely than the others by about one part in 860 million, which is negligible.
+
+Every series is also in one R file, `data/placebo_esp.RData` (69 MB), with one data frame per series, the file lists, the surviving bits and a short description of each object:
+
+```r
+load("data/placebo_esp.RData")
+about                                      # what each object holds
+x <- main$morning - main$afternoon + 250   # exactly Binomial(500, 1/2) under chance
+```
+
+It is built from the .npz files by `code/make_rdata.R`, and `code/check_rdata.py` confirms that every value is identical.
 
 Load any series with numpy:
 
@@ -72,14 +84,16 @@ Python 3.9 or later.
 pip install -r requirements.txt
 python code/analyse.py                    # a minute or two; writes results/summary.md and CSVs
 python code/extra_checks.py               # writes results/extra_checks.md
-python code/iversen_check.py 20000 10000  # about 25 minutes; results/iversen_battery.txt
+python code/iversen_check.py 20000 10000  # about 25 minutes; results/iversen_battery.txt and iversen_replicates_20000_10000.npz
 python code/figure1.py                    # results/figure1.png and figure1.pdf (needs matplotlib)
 python code/zener.py                      # results/zener.md
+Rscript code/make_rdata.R                 # data/placebo_esp.RData (needs R; about 8 minutes)
+python code/check_rdata.py                # confirms the R file matches the .npz files
 ```
 
 To rebuild `data/` from the original workspaces: `python code/extract.py /folder/with/RData/files`.
 
-`iversen_check.py` uses a fixed seed (2026), so `python code/iversen_check.py 20000 10000` reproduces the figures in `results/iversen_battery.txt` exactly (only the progress and timing lines differ).
+`iversen_check.py` uses a fixed seed (2026), so `python code/iversen_check.py 20000 10000` reproduces the figures in `results/iversen_battery.txt` exactly (only the progress and timing lines differ). The result for each simulated data set (its number of extreme scores, and for the 100-block sets the variance of its covariance scores) is saved in `results/iversen_replicates_20000_10000.npz`, so the probabilities can be checked without rerunning the simulation.
 
 ## Main results
 
