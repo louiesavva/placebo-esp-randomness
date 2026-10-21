@@ -50,16 +50,14 @@ For the morning-afternoon design, with *M* and *A* the morning and afternoon hit
 
 For digit matching, hits are Binomial(*n*, 1/10) with *n* = 500, 490 or 268, and CR = (*X* - *np*) / sqrt(*np*(1 - *p*)).
 
-### Provenance and data quality
+### Provenance
 
-- The original workspaces stored critical ratios, not hit counts. `extract.py` recovers the integer counts exactly and checks that every recovered value is a whole number.
-- Everything in `data/` is a single, canonical copy of each series, checked to contain only whole-number counts. The main series comes from `rand1.RData`. An older saved copy of the same experiments, `Spencp.RData`, has a few damaged values (about 0.005%, probably from memory or disk errors). It is not used for any result here; `extract.py` reads it only for the list of random.org files and to confirm that its undamaged values match. The damage explains why counts from the 2012 analysis differ from Table 1 by up to six.
-- No experiment was excluded. The main series is exactly 2,266 files x 16,777 experiments.
-- The 2012 analysis computed p-values as `2*pnorm(-abs(cr))`, that is, from the normal approximation. That choice produced the apparent anomaly.
-- The source of the two runs in `other_runs.npz` was not recorded. They are included for completeness, and they fit the binomial as well as the rest.
-- Not included: a few workspaces holding a variant design after Stevens (`mmmmm`, `multi`, `rand2`), which was not analysed, and test or partial workspaces.
-
-The original `.RData` files (about 460 MB) are available from the author.
+- **One copy of each series.** Every file in `data/` holds one complete, checked copy of its series. Nothing was excluded: the main series is exactly 2,266 files × 16,777 experiments = 38,016,682.
+- **How the counts were recovered.** The original R workspaces stored critical ratios rather than hit counts. `extract.py` converts them back to whole-number counts and stops if any value does not convert exactly.
+- **Where the main series comes from.** `rand1.RData`. An older copy of the same experiments, `Spencp.RData`, has about 0.005% of its values damaged, probably by memory or disk errors. It is used only for the list of random.org files and as a cross-check (its undamaged values agree exactly), and it is why counts in the 2012 analysis differ from Table 1 by up to six.
+- **What went wrong in 2012.** The original analysis computed p-values as `2*pnorm(-abs(cr))`, the normal approximation. That is the source of the apparent anomaly.
+- **Unrecorded source.** The source of the two runs in `other_runs.npz` was not recorded. They are included for completeness and fit the binomial as well as the rest.
+- **Not included.** Workspaces for a variant design after Stevens (`mmmmm`, `multi`, `rand2`), which has not been analysed, and test or partial workspaces. The original `.RData` files (about 460 MB) are available from the author.
 
 ## Reproducing the results
 
