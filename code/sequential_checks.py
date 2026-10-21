@@ -18,11 +18,14 @@ of independent fair bits:
    experiment, and lag 500 is the same trial in consecutive experiments.
 4. Run lengths. Complete runs (the first and last run of each file left out) have
    P(length = k) = 2^-k; lengths 1 to 24 and 25 or more are compared by chi-square.
-5. Day to day. A z score for the proportion of ones and for the runs is computed for each
-   file. If days differed only by chance, the mean of the squared z scores would be close
-   to 1 (a chi-square test with one degree of freedom per file).
+5. Day to day. A z score for every statistic above is computed for each file. If days
+   differed only by chance, the mean of the squared z scores would be close to 1 (a
+   chi-square test with one degree of freedom per file). For the runs, the excess over 1
+   is converted into the standard deviation across days of the correlation between
+   successive bits, and the days are broken down by year.
 
-Writes results/sequential_checks.md when all 2,266 files are present.
+Writes results/sequential_checks.md and results/sequential_by_day.csv (every file's z
+scores) when all 2,266 files are present.
 """
 import os, sys, tarfile, zipfile
 import numpy as np
@@ -64,7 +67,7 @@ seen = set()
 ones = changes = 0
 agree = np.zeros(len(LAGS), dtype=np.int64)
 runlen = np.zeros(MAXLEN + 1, dtype=np.int64)          # index k = length k; MAXLEN = MAXLEN or more
-z_ones, z_runs = [], []
+rows = []                                              # (date, z_ones, z_runs, z at each lag)
 for name, raw in texts(folder):
     if name not in files or name in seen:
         continue
@@ -77,13 +80,14 @@ for name, raw in texts(folder):
     o = int(x.sum()); ones += o
     sw = x[1:] != x[:-1]
     c = int(sw.sum()); changes += c
+    zl = []
     for j, k in enumerate(LAGS):
-        agree[j] += int((x[k:] == x[:-k]).sum())
+        g = int((x[k:] == x[:-k]).sum()); agree[j] += g
+        zl.append((g - (USED - k) / 2) / np.sqrt((USED - k) / 4))
     edges = np.flatnonzero(sw)                         # a run ends at each change
     lengths = np.diff(edges)                           # complete runs only
     runlen += np.bincount(np.minimum(lengths, MAXLEN), minlength=MAXLEN + 1)[:MAXLEN + 1]
-    z_ones.append((o - USED / 2) / np.sqrt(USED / 4))
-    z_runs.append((c - (USED - 1) / 2) / np.sqrt((USED - 1) / 4))
+    rows.append((name[:-4], (o - USED / 2) / np.sqrt(USED / 4), (c - (USED - 1) / 2) / np.sqrt((USED - 1) / 4), zl))
     if len(seen) % 100 == 0:
         print(f'{len(seen):,} files read')
 
@@ -125,14 +129,52 @@ md += [f'| {k if k < MAXLEN else f"{MAXLEN}+"} | {obs[k - 1]:,} | {exp[k - 1]:,.
        for k in (1, 2, 3, 4, 5, 10, 15, 20, MAXLEN)]
 md += ['']
 
-zo, zr = np.array(z_ones), np.array(z_runs)
+rows.sort()
+dates = [r[0] for r in rows]
+zo = np.array([r[1] for r in rows]); zr = np.array([r[2] for r in rows])
+ZL = np.array([r[3] for r in rows])                     # files x lags
+
+
+def disp(label, z):
+    q = float((z ** 2).sum()); pz = (q - F) / np.sqrt(2 * F)
+    pv = chi2.sf(q, F)
+    return f'| {label} | {z.mean():+.3f} | {z.std():.3f} | {(z ** 2).mean():.3f} | {pz:+.1f} | {"< .001" if pv < 0.001 else f"{pv:.3f}"} |'
+
+
 md += ['## Day to day', '',
-       '| per-file z score | mean | mean of z squared (expected 1) | chi-square p |', '|---|---|---|---|',
-       f'| ones | {zo.mean():+.3f} | {(zo ** 2).mean():.3f} | {chi2.sf((zo ** 2).sum(), F):.3f} |',
-       f'| runs | {zr.mean():+.3f} | {(zr ** 2).mean():.3f} | {chi2.sf((zr ** 2).sum(), F):.3f} |', '']
+       'If the days differed only by chance, each column of per-file z scores would have mean 0, '
+       'standard deviation 1 and mean square 1.', '',
+       '| per-file z score | mean | SD | mean of z squared | excess as z | chi-square p |', '|---|---|---|---|---|---|',
+       disp('ones', zo), disp('runs (lag 1)', zr)]
+md += [disp(f'agreement at lag {k}', ZL[:, j]) for j, k in enumerate(LAGS)]
+excess = max(zr.var() - 1, 0.0)
+rho_sd = np.sqrt(excess) / np.sqrt(USED - 1)
+md += ['', f'For the runs, a correlation r between successive bits shifts a file\'s z score by about '
+       f'-r x sqrt({USED - 1:,}). The variance of the runs z scores beyond 1 ({excess:.3f}) therefore implies '
+       f'that the correlation between successive bits varies from day to day with a standard deviation of '
+       f'about {rho_sd:.6f}. A correlation r changes the variance of a 250-trial hit count by a factor of about '
+       f'1 + 2r, so day-to-day variation of this size changes it by about {2 * rho_sd:.2%}.', '']
+zr_next = np.corrcoef(zr[:-1], zr[1:])[0, 1]
+md += [f'Correlation between the runs z scores of consecutive days (in date order): {zr_next:+.3f} '
+       f'(standard error about {1 / np.sqrt(F):.3f} if days are independent).', '']
+years = sorted(set(d[:4] for d in dates))
+md += ['### Runs by year', '', '| year | files | mean z | SD of z | mean of z squared | implied SD of correlation |',
+       '|---|---|---|---|---|---|']
+for y in years:
+    z = zr[[d.startswith(y) for d in dates]]
+    md.append(f'| {y} | {len(z)} | {z.mean():+.3f} | {z.std():.3f} | {(z ** 2).mean():.3f} | '
+              f'{np.sqrt(max(z.var() - 1, 0)) / np.sqrt(USED - 1):.6f} |')
+top = np.argsort(-np.abs(zr))[:10]
+md += ['', '### The ten days with the most extreme runs z scores', '', '| day | runs z | ones z |', '|---|---|---|']
+md += [f'| {dates[i]} | {zr[i]:+.2f} | {zo[i]:+.2f} |' for i in top]
+md += ['']
 
 print('\n'.join(md))
 if F == 2266:
     with open(os.path.join(HERE, '..', 'results', 'sequential_checks.md'), 'w') as fh:
         fh.write('\n'.join(md) + '\n')
-    print('Written to results/sequential_checks.md')
+    with open(os.path.join(HERE, '..', 'results', 'sequential_by_day.csv'), 'w') as fh:
+        fh.write('date,z_ones,z_runs,' + ','.join(f'z_lag{k}' for k in LAGS) + '\n')
+        for d, a1, a2, zl in rows:
+            fh.write(f'{d},{a1:.4f},{a2:.4f},' + ','.join(f'{v:.4f}' for v in zl) + '\n')
+    print('Written to results/sequential_checks.md and results/sequential_by_day.csv')
