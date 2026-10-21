@@ -1,0 +1,20 @@
+{
+  "upload_type": "dataset",
+  "title": "Placebo ESP experiments: data and code",
+  "creators": [
+    {
+      "name": "Savva, Louie",
+      "affiliation": "Independent researcher, Leicester, United Kingdom"
+    }
+  ],
+  "description": "<p>Hit counts for every experiment in a set of placebo ESP experiments run between 2006 and 2013, in which random numbers stood in for both the target and the guess, so that no psi was possible. The main series is 38,016,682 experiments of Spencer-Brown's morning-afternoon design (about 19 billion binary trials) using atmospheric-noise random numbers from random.org. Smaller series used a pseudo-random generator (the Mersenne Twister in R), a hardware generator (Simtec Electronics' Entropy Key), Spencer-Brown's digit-matching design (random.org and Entropy Key) and Zener cards (473,594 experiments of 625 trials).</p><p>The deposit includes the code that recovered the counts from the original R workspaces, the code for every table and figure in <em>Anomalous Significance Revisited: Nineteen Billion Placebo Trials and the Normal Approximation</em> and <em>Too Many Miracles</em>, a simulation of the Iversen et al. (1971) test battery with the result for every simulated data set, and the whole data set as one R file (data/placebo_esp.RData). Code is under the MIT licence; data and results are under CC BY 4.0.</p>",
+  "license": "cc-by-4.0",
+  "keywords": [
+    "binomial distribution",
+    "normal approximation",
+    "random number generators",
+    "parapsychology",
+    "placebo experiments",
+    "continuity correction"
+  ]
+}
