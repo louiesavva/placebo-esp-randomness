@@ -84,8 +84,9 @@ for name, x in (('difference M - A', D), ('total M + A', T)):
         o = int((np.abs(x) <= k).sum())
         e = N * pm[250 - k:251 + k].sum()
         md.append(f'| {name} | abs <= {k} | {o:,} | {e:,.0f} | {(o - e) / np.sqrt(e * (1 - e / N)):+.2f} |')
-p12 = 1 - (1 - 2 * norm.sf(2.55)) ** 12
-md += ['', f'Chance that the largest of 12 independent |z| reaches 2.55: {p12:.2f}.', '']
+z1 = (int((np.abs(D) <= 1).sum()) - N * pm[249:252].sum()) / np.sqrt(N * pm[249:252].sum() * (1 - pm[249:252].sum()))
+md += ['', f'Nominal two-sided p for the excess within one hit of M = A (z = {z1:.2f}): {2 * norm.sf(abs(z1)):.4f}. '
+       'This window was chosen after looking at the data, among overlapping comparisons, so the nominal p overstates the evidence.', '']
 
 # ---- 3. tails separately ------------------------------------------------------
 md += ['## 3. Upper and lower tails of the difference', '',
@@ -93,7 +94,8 @@ md += ['## 3. Upper and lower tails of the difference', '',
 for t, L in ((3.0, 34), (3.5, 40), (4.0, 45)):
     up = int((D >= L).sum()); lo = int((D <= -L).sum()); e = N * pm[250 + L:].sum()
     md.append(f'| {t} | {up:,} | {lo:,} | {e:,.0f} |')
-md.append('')
+L = 40; lo = int((D <= -L).sum()); e = N * pm[250 + L:].sum(); zlo = (lo - e) / np.sqrt(e * (1 - e / N))
+md += ['', f'Afternoon-ahead count at t = 3.5: z = {zlo:.2f}, nominal two-sided p = {2 * norm.sf(abs(zlo)):.4f} (chosen after looking at the data).', '']
 
 # ---- 4. the +6 displacement ---------------------------------------------------
 x = load('random_org_digits.npz')['plus6'].astype(np.int64)

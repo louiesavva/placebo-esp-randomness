@@ -47,7 +47,7 @@ From the total score, 3v <= 0.00112 (upper 95% limit), so v <= 0.000372: the var
 | total M + A | abs <= 1 | 4,056,475 | 4,056,751 | -0.14 |
 | total M + A | abs <= 2 | 6,726,295 | 6,725,497 | +0.34 |
 
-Chance that the largest of 12 independent |z| reaches 2.55: 0.12.
+Nominal two-sided p for the excess within one hit of M = A (z = 2.96): 0.0031. This window was chosen after looking at the data, among overlapping comparisons, so the nominal p overstates the evidence.
 
 ## 3. Upper and lower tails of the difference
 
@@ -56,6 +56,8 @@ Chance that the largest of 12 independent |z| reaches 2.55: 0.12.
 | 3.0 | 51,263 | 51,466 | 51,261 |
 | 3.5 | 7,639 | 7,903 | 7,611 |
 | 4.0 | 1,244 | 1,313 | 1,255 |
+
+Afternoon-ahead count at t = 3.5: z = 3.34, nominal two-sided p = 0.0008 (chosen after looking at the data).
 
 ## 4. random.org digits, +6 displacement
 

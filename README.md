@@ -2,7 +2,7 @@
 
 Data and code for two papers by Louie Savva:
 
-- *Anomalous Significance Revisited: Forty Million Placebo Experiments and the Shape of Chance* (research paper, in preparation)
+- *Anomalous Significance Revisited: Nineteen Billion Placebo Trials and the Normal Approximation* (research paper, in preparation)
 - *Too Many Miracles* (non-technical article, under review)
 
 Between 2006 and 2013 the author ran tens of millions of placebo "ESP" experiments, in which random numbers stood in for both the target and the guess, so no psi was possible. An analysis in 2012 found too many extreme critical ratios and took this as evidence that real random sources misbehave in their tails. That conclusion was wrong. The excess is real when the counts are judged against the normal approximation to the binomial, and disappears when they are judged against the exact binomial. This repository holds every experiment's hit counts, the code that recovered them from the original R workspaces, and the code for every table in both papers.
@@ -54,7 +54,7 @@ For digit matching, hits are Binomial(*n*, 1/10) with *n* = 500, 490 or 268, and
 
 - **One copy of each series.** Every file in `data/` holds one complete, checked copy of its series. Nothing was excluded: the main series is exactly 2,266 files × 16,777 experiments = 38,016,682.
 - **How the counts were recovered.** The original R workspaces stored critical ratios rather than hit counts. `extract.py` converts them back to whole-number counts and stops if any value does not convert exactly.
-- **Where the main series comes from.** `rand1.RData`. An older copy of the same experiments, `Spencp.RData`, has about 0.005% of its values damaged, probably by memory or disk errors. It is used only for the list of random.org files and as a cross-check (its undamaged values agree exactly), and it is why counts in the 2012 analysis differ from Table 1 by up to six.
+- **Where the main series comes from.** `rand1.RData`. An older copy of the same experiments, `Spencp.RData`, has 1,367 damaged values (0.004% of experiments), in three blocks of about a thousand experiments, probably caused by memory or disk errors. It is used only for the list of random.org files and as a cross-check (its undamaged values agree exactly), and it is why counts in the 2012 analysis differ from Table 1 by up to six.
 - **What went wrong in 2012.** The original analysis computed p-values as `2*pnorm(-abs(cr))`, the normal approximation. That is the source of the apparent anomaly.
 - **Unrecorded source.** The source of the two runs in `other_runs.npz` was not recorded. They are included for completeness and fit the binomial as well as the rest.
 
@@ -72,18 +72,18 @@ python code/figure1.py                    # results/figure1.png and figure1.pdf 
 
 To rebuild `data/` from the original workspaces: `python code/extract.py /folder/with/RData/files`.
 
-`iversen_check.py` uses a fixed seed (2026), so `python code/iversen_check.py 20000 10000` reproduces `results/iversen_battery.txt` exactly.
+`iversen_check.py` uses a fixed seed (2026), so `python code/iversen_check.py 20000 10000` reproduces the figures in `results/iversen_battery.txt` exactly (only the progress and timing lines differ).
 
 ## Main results
 
 Full tables are in `results/summary.md` and `results/extra_checks.md`.
 
 - **Main series, against the exact binomial.** At the seven thresholds in Table 1 (|CR| >= 2.0 to 5.0), no count differs from its exact expectation by more than 1.1 standard errors. Across fifteen thresholds the largest discrepancy is 2.1% at 3.5 (2.6 SE); a discrepancy that large somewhere among the fifteen occurs in 9% of simulated binomial series.
-- **Main series, against the normal approximation.** Errors run in both directions: 10% too few extremes predicted at |CR| >= 2.5, 13% too many at 2.6. The sign reverses roughly every 0.85 in the threshold, because the lattice of possible CRs (spacing 0.0894) drifts against a 0.1 grid of thresholds.
+- **Main series, against the normal approximation.** Errors run in both directions: 10% too few extremes predicted at |CR| >= 2.5, 13% too many at 2.6. Roughly every 0.85 in the threshold the error jumps from negative to positive, because the lattice of possible CRs (spacing 0.0894) drifts against a 0.1 grid of thresholds; between the jumps it drifts back down through zero.
 - **Every source and design.** The main series fits the exact binomial closely, and so do nearly all the others: variances within 0.3%, counts of |CR| >= 3 within 3%. Three of 35 chi-square fits give p < .05 (1.75 expected). One exploratory comparison, the +6 displacement of the random.org digits, departs significantly (p = .001, surviving a Bonferroni correction for 35 fits); it is not concentrated in the tails and remains unexplained.
 - **Digit matching (p = 1/10).** The normal curve badly undercounts the upper tail. At CR >= 3.5 the Entropy Key gave 461 experiments (exact 455, normal 233) and the random.org digits 835 (exact 832, normal 258).
 - **Does the standard error vary?** No. The daily variances are exactly as dispersed as chance predicts (p = .49), and the kurtosis of the total score limits any experiment-to-experiment variation in the standard error to about 1%. The difference score shows a small central excess (z = 3.0 within one hit of *M* = *A*) not shared by the total score; it is reported in `results/extra_checks.md`.
-- **Iversen et al. (1971).** Their test battery is well calibrated under ideal randomness. Their dice (16 extreme scores of 267, 12.3 expected, P = .21) and pseudo-random series (5, 3.11 expected, P = .21) are within chance. Only the RAND digits are unusual (10, P = .003). Probabilities come from 20,000 simulated 100-block data sets and 10,000 simulated dice sets, with exact 95% intervals in the output.
+- **Iversen et al. (1971).** Their test battery is well calibrated under ideal randomness. Their dice (16 extreme scores of 267, 12.3 expected, P = .21) and pseudo-random series (5, 3.11 expected, P = .22) are within chance. Only the RAND digits are unusual (10, P = .003). Probabilities come from 20,000 simulated 100-block data sets and 10,000 simulated dice sets, with exact 95% intervals in the output.
 
 ## Licence and citation
 
