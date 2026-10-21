@@ -8,8 +8,8 @@ flags |z| > 2 under ideal randomness, and how unusual their published
 counts of extreme scores were.
 
 Requires: Python 3 and numpy  (pip install numpy)
-Run:      python iversen_check.py            (about 2-4 minutes)
-          python iversen_check.py 2000 1000  (more replicates, slower)
+Run:      python iversen_check.py              (about 2-4 minutes)
+          python iversen_check.py 20000 10000  (as reported in the paper; about 25 minutes)
 """
 import sys, time
 import numpy as np
@@ -90,7 +90,7 @@ print(f"\n2. Running {N_RAND} simulated 100-block data sets (like their RAND and
 t0 = time.time(); Z = []
 for k in range(N_RAND):
     Z.append(run_battery(100))
-    if (k+1) % 100 == 0: print(f"   {k+1}/{N_RAND}  ({time.time()-t0:.0f}s)")
+    if (k+1) % 1000 == 0: print(f"   {k+1}/{N_RAND}  ({time.time()-t0:.0f}s)")
 Z = np.array(Z)
 ext = (np.abs(Z) > 2).sum(1)
 cov_var = Z[:, 22:67].var(1)
@@ -98,19 +98,30 @@ nominal = 0.0455
 print(f"   Share of scores beyond +/-2: {(np.abs(Z) > 2).mean():.4f}   (nominal {nominal})")
 print(f"   Covariance scores only:      {(np.abs(Z[:, 22:]) > 2).mean():.4f}")
 print(f"   Mean extremes per 67 scores: {ext.mean():.2f}   (nominal {67*nominal:.2f})")
-print(f"   P(>= 5 extremes)  [their pseudo-random had 5]: {(ext >= 5).mean():.4f}")
-print(f"   P(>= 10 extremes) [their RAND had 10]:         {(ext >= 10).mean():.4f}")
-print(f"   P(covariance-score variance >= 1.97) [their RAND]: {(cov_var >= 1.97).mean():.4f}")
+def prop(hits, n):
+    """Proportion with an exact 95% (Clopper-Pearson) interval."""
+    from scipy.stats import beta
+    lo = beta.ppf(0.025, hits, n - hits + 1) if hits else 0.0
+    hi = beta.ppf(0.975, hits + 1, n - hits) if hits < n else 1.0
+    return f"{hits/n:.4f}  ({hits} of {n}; 95% CI {lo:.4f} to {hi:.4f})"
+print(f"   P(>= 5 extremes)  [their pseudo-random had 5]: {prop(int((ext >= 5).sum()), len(ext))}")
+print(f"   P(>= 10 extremes) [their RAND had 10]:         {prop(int((ext >= 10).sum()), len(ext))}")
+print(f"   P(covariance-score variance >= 1.97) [their RAND]: {prop(int((cov_var >= 1.97).sum()), len(ext))}")
 
 # ---- 3. The dice: brands A, B, C, X with their real block counts -----------
 print(f"\n3. Running {N_DICE} simulated dice sets (100 + 30 + 31 + 58 blocks)")
-t0 = time.time(); D = []
+# Iversen et al. counted 267 dice scores, not 4 x 67 = 268: their summary covers "all the
+# standard scores that we show in this publication", one fewer than the full battery. So we
+# also count extremes with one score, chosen at random, left out of each simulated set.
+t0 = time.time(); D = []; D267 = []
 for k in range(N_DICE):
-    tot = sum(int((np.abs(run_battery(b)) > 2).sum()) for b in (100, 30, 31, 58))
-    D.append(tot)
-    if (k+1) % 50 == 0: print(f"   {k+1}/{N_DICE}  ({time.time()-t0:.0f}s)")
-D = np.array(D)
-print(f"   Mean extremes per 268 scores: {D.mean():.2f}")
-print(f"   P(>= 16 extremes) [their dice had 16 of 267]: {(D >= 16).mean():.4f}")
+    flags = np.concatenate([np.abs(run_battery(b)) > 2 for b in (100, 30, 31, 58)])
+    D.append(int(flags.sum()))
+    D267.append(int(np.delete(flags, rng.integers(len(flags))).sum()))
+    if (k+1) % 500 == 0: print(f"   {k+1}/{N_DICE}  ({time.time()-t0:.0f}s)")
+D = np.array(D); D267 = np.array(D267)
+print(f"   Mean extremes per 268 scores: {D.mean():.2f}; per 267 scores: {D267.mean():.2f}")
+print(f"   P(>= 16 extremes of 268): {prop(int((D >= 16).sum()), len(D))}")
+print(f"   P(>= 16 extremes of 267) [their dice had 16 of 267]: {prop(int((D267 >= 16).sum()), len(D267))}")
 
 print("\nSummary: compare with Iversen et al.'s ratios of 1.3 (dice), 3 (RAND) and 1.7 (pseudo-random).")

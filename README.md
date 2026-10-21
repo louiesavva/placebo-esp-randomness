@@ -33,7 +33,7 @@ results/             output of the scripts above
 | `random_org_125.npz` | Short series | random.org | morning-afternoon, 125 + 125 | 2,266,000 | hits in each half (of 125) | `randmorn.RData` | not used |
 | `other_runs.npz` | Unlabelled runs | not recorded | morning-afternoon, 250 + 250 | 1,000,000 and 255,732 | `mcr_*`, `aao1rng_*` | `mcr.RData`, `aao1rng.RData` | not used |
 
-`random_org_files.txt` lists the 2,266 daily random.org files used by the main series, 12 March 2006 to 4 August 2012, in order. Each 1 MiB file supplied 16,777 experiments (8,388,500 bits), so experiment *i* comes from file *i* // 16,777.
+`random_org_files.txt` lists the 2,266 daily random.org files used by the main series, 12 March 2006 to 4 August 2012, in order. Each 1 MiB file supplied 16,777 experiments, using 8,388,500 of its 8,388,608 bits: one bit per trial, serving as the hit indicator (equivalent to matching a random target with a random guess, since the match of two independent fair bits is itself a fair bit). Experiment *i* comes from file *i* // 16,777.
 
 Load any series with numpy:
 
@@ -66,13 +66,13 @@ Python 3.9 or later.
 pip install -r requirements.txt
 python code/analyse.py                    # a minute or two; writes results/summary.md and CSVs
 python code/extra_checks.py               # writes results/extra_checks.md
-python code/iversen_check.py 2000 1000    # about 3 minutes; results/iversen_battery.txt
+python code/iversen_check.py 20000 10000  # about 25 minutes; results/iversen_battery.txt
 python code/figure1.py                    # results/figure1.png and figure1.pdf (needs matplotlib)
 ```
 
 To rebuild `data/` from the original workspaces: `python code/extract.py /folder/with/RData/files`.
 
-`iversen_check.py` uses a fixed seed (2026), so it reproduces `results/iversen_battery.txt` exactly.
+`iversen_check.py` uses a fixed seed (2026), so `python code/iversen_check.py 20000 10000` reproduces `results/iversen_battery.txt` exactly.
 
 ## Main results
 
@@ -80,10 +80,10 @@ Full tables are in `results/summary.md` and `results/extra_checks.md`.
 
 - **Main series, against the exact binomial.** At the seven thresholds in Table 1 (|CR| >= 2.0 to 5.0), no count differs from its exact expectation by more than 1.1 standard errors. Across fifteen thresholds the largest discrepancy is 2.1% at 3.5 (2.6 SE); a discrepancy that large somewhere among the fifteen occurs in 9% of simulated binomial series.
 - **Main series, against the normal approximation.** Errors run in both directions: 10% too few extremes predicted at |CR| >= 2.5, 13% too many at 2.6. The sign reverses roughly every 0.85 in the threshold, because the lattice of possible CRs (spacing 0.0894) drifts against a 0.1 grid of thresholds.
-- **Every series** fits the exact binomial: variances within 0.3%, counts of |CR| >= 3 within 3%. Three of 35 chi-square fits give p < .05 (1.75 expected). The poorest, the +6 displacement of the random.org digits, has p = .001.
+- **Every source and design.** The main series fits the exact binomial closely, and so do nearly all the others: variances within 0.3%, counts of |CR| >= 3 within 3%. Three of 35 chi-square fits give p < .05 (1.75 expected). One exploratory comparison, the +6 displacement of the random.org digits, departs significantly (p = .001, surviving a Bonferroni correction for 35 fits); it is not concentrated in the tails and remains unexplained.
 - **Digit matching (p = 1/10).** The normal curve badly undercounts the upper tail. At CR >= 3.5 the Entropy Key gave 461 experiments (exact 455, normal 233) and the random.org digits 835 (exact 832, normal 258).
 - **Does the standard error vary?** No. The daily variances are exactly as dispersed as chance predicts (p = .49), and the kurtosis of the total score limits any experiment-to-experiment variation in the standard error to about 1%. The difference score shows a small central excess (z = 3.0 within one hit of *M* = *A*) not shared by the total score; it is reported in `results/extra_checks.md`.
-- **Iversen et al. (1971).** Their test battery is well calibrated under ideal randomness. Their dice (16 extreme scores, 12.5 expected, P = .21) and pseudo-random series (5, 3.15 expected, P = .22) are within chance. Only the RAND digits are unusual (10, P = .004).
+- **Iversen et al. (1971).** Their test battery is well calibrated under ideal randomness. Their dice (16 extreme scores of 267, 12.4 expected, P = .21) and pseudo-random series (5, 3.11 expected, P = .21) are within chance. Only the RAND digits are unusual (10, P = .003). Probabilities come from 20,000 simulated 100-block data sets and 10,000 simulated dice sets, with exact 95% intervals in the output.
 
 ## Licence and citation
 
