@@ -10,7 +10,9 @@ random.org distributes its daily pregenerated files at https://archive.random.or
 file, characters 108 to 8,388,607 (counting from 1) in order: 8,388,500 bits, taken 500 at a
 time, the first 250 of each block as the morning hits and the next 250 as the afternoon
 hits. The first 107 characters and the last one were not used. This rule was established
-by comparing the archive file for 17 June 2012 with the bits of that day saved in 2012.
+by comparing the archive file for 17 June 2012 with the bits of that day saved in 2012,
+and confirmed on 21 October 2026, when all 2,266 archive files rebuilt every one of the
+38,016,682 experiments exactly.
 
 The folder is searched recursively. It may hold the daily .txt files themselves, or .zip,
 .tgz or .tar.gz archives containing them (such as random.org's monthly archives). Files
