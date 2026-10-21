@@ -10,8 +10,16 @@ counts of extreme scores were.
 Requires: Python 3 and numpy  (pip install numpy)
 Run:      python iversen_check.py              (about 2-4 minutes)
           python iversen_check.py 20000 10000  (as reported in the paper; about 25 minutes)
+
+Besides the printed summary, the result for every simulated data set is saved to
+results/iversen_replicates_<N_RAND>_<N_DICE>.npz:
+    rand_extremes      scores beyond +/-2 among the 67 in each 100-block data set
+    rand_cov_extremes  of which covariance scores (45 per data set)
+    rand_cov_var       variance of the 45 covariance scores in each data set
+    dice_extremes_268  scores beyond +/-2 among the 268 in each dice set (brands A, B, C, X)
+    dice_extremes_267  the same without brand X's proportion-of-evens score
 """
-import sys, time
+import os, sys, time
 import numpy as np
 
 N_RAND = int(sys.argv[1]) if len(sys.argv) > 1 else 1000   # 100-block data sets
@@ -128,3 +136,12 @@ print(f"   P(>= 16 extremes of 268, full battery): {prop(int((D >= 16).sum()), l
 print(f"   P(>= 16 extremes of 267, without brand X's evens score) [their dice had 16 of 267]: {prop(int((D267 >= 16).sum()), len(D267))}")
 
 print("\nSummary: compare with Iversen et al.'s ratios of 1.3 (dice), 3 (RAND) and 1.7 (pseudo-random).")
+
+out = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'results',
+                   f'iversen_replicates_{N_RAND}_{N_DICE}.npz')
+np.savez_compressed(out, seed=SEED,
+                    rand_extremes=ext.astype(np.int16),
+                    rand_cov_extremes=(np.abs(Z[:, 22:]) > 2).sum(1).astype(np.int16),
+                    rand_cov_var=cov_var,
+                    dice_extremes_268=D.astype(np.int16), dice_extremes_267=D267.astype(np.int16))
+print(f"Results for each simulated data set saved to results/{os.path.basename(out)}")
