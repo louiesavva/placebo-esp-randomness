@@ -110,18 +110,21 @@ print(f"   P(covariance-score variance >= 1.97) [their RAND]: {prop(int((cov_var
 
 # ---- 3. The dice: brands A, B, C, X with their real block counts -----------
 print(f"\n3. Running {N_DICE} simulated dice sets (100 + 30 + 31 + 58 blocks)")
-# Iversen et al. counted 267 dice scores, not 4 x 67 = 268: their summary covers "all the
-# standard scores that we show in this publication", one fewer than the full battery. So we
-# also count extremes with one score, chosen at random, left out of each simulated set.
+# Iversen et al. counted 267 dice scores, not 4 x 67 = 268. Their summary covers "all the
+# standard scores that we show in this publication (except those for the unadjusted statistics
+# of brand X dice)". Brand X was biased (0.5072 evens), so its run statistics were recomputed
+# with that observed proportion (X*), which leaves no adjusted score for the proportion of evens
+# itself. The matched count therefore leaves out brand X's proportion-of-evens score (the first
+# score in brand X's battery). Simulated throws are fair, so brand X is simulated like the others.
 t0 = time.time(); D = []; D267 = []
 for k in range(N_DICE):
-    flags = np.concatenate([np.abs(run_battery(b)) > 2 for b in (100, 30, 31, 58)])
-    D.append(int(flags.sum()))
-    D267.append(int(np.delete(flags, rng.integers(len(flags))).sum()))
+    zs = [np.abs(run_battery(b)) > 2 for b in (100, 30, 31, 58)]      # brands A, B, C, X
+    D.append(int(sum(z.sum() for z in zs)))
+    D267.append(int(sum(z.sum() for z in zs[:3]) + zs[3][1:].sum()))
     if (k+1) % 500 == 0: print(f"   {k+1}/{N_DICE}  ({time.time()-t0:.0f}s)")
 D = np.array(D); D267 = np.array(D267)
 print(f"   Mean extremes per 268 scores: {D.mean():.2f}; per 267 scores: {D267.mean():.2f}")
-print(f"   P(>= 16 extremes of 268): {prop(int((D >= 16).sum()), len(D))}")
-print(f"   P(>= 16 extremes of 267) [their dice had 16 of 267]: {prop(int((D267 >= 16).sum()), len(D267))}")
+print(f"   P(>= 16 extremes of 268, full battery): {prop(int((D >= 16).sum()), len(D))}")
+print(f"   P(>= 16 extremes of 267, without brand X's evens score) [their dice had 16 of 267]: {prop(int((D267 >= 16).sum()), len(D267))}")
 
 print("\nSummary: compare with Iversen et al.'s ratios of 1.3 (dice), 3 (RAND) and 1.7 (pseudo-random).")
