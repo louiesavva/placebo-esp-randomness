@@ -5,6 +5,8 @@ type: dataset
 authors:
   - family-names: Savva
     given-names: Louie
+version: 1.0.0
+doi: 10.5281/zenodo.23541088
 date-released: 2026-10-21
 repository-code: "https://github.com/louiesavva/placebo-esp-randomness"
 license:
