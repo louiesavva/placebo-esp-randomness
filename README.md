@@ -1,0 +1,91 @@
+# Placebo ESP experiments and the normal approximation
+
+Data and code for two papers by Louie Savva:
+
+- *Anomalous Significance Revisited: Forty Million Placebo Experiments and the Shape of Chance* (journal manuscript, 2026)
+- *Too Many Miracles* (submitted to *CHANCE*, UCHA-2026-0014)
+
+Between 2006 and 2013 the author ran tens of millions of placebo "ESP" experiments, in which random numbers stood in for both the target and the guess, so no psi was possible. An analysis in 2012 found too many extreme critical ratios and took this as evidence that real random sources misbehave in their tails. That conclusion was wrong. The excess is real when the counts are judged against the normal approximation to the binomial, and disappears when they are judged against the exact binomial. This repository holds every experiment's hit counts, the code that recovered them from the original R workspaces, and the code for every table in both papers.
+
+## Contents
+
+```
+code/
+  rdata_reader.py    reads R workspaces (.RData) in Python, without R
+  extract.py         original .RData files  ->  data/*.npz
+  analyse.py         data/*.npz  ->  results/ (every table except the Iversen simulation)
+  extra_checks.py    follow-up checks on the main series  ->  results/extra_checks.md
+  iversen_check.py   simulation of the Iversen et al. (1971) test battery
+  find_rdata.py      utility used to search the author's disks for the original files
+data/                hit counts per experiment, unsigned 8-bit, numpy .npz (67 MB)
+results/             output of the scripts above
+```
+
+## The data
+
+| File | Series | Random source | Design | Experiments | Score(s) | Original workspace | 2012 analysis |
+|---|---|---|---|---|---|---|---|
+| `random_org_main_morning.npz`, `random_org_main_afternoon.npz` | Main series | random.org (atmospheric noise) | Spencer-Brown's morning-afternoon: 250 + 250 binary trials, p = 1/2 | 38,016,682 | hits in each half (of 250) | `rand1.RData` (checked against `Spencp.RData`) | Example 1B |
+| `prng.npz` | Pseudo-random | Mersenne Twister in R | morning-afternoon, 250 + 250 | 1,000,004 | hits in each half | `prng.RData` | Example 1A |
+| `entropy_key_digits.npz` | Hardware | Entropy Key (avalanche noise, read from `/dev/random`) | Spencer-Brown's digit matching: 500 pairs, p = 1/10; +1 and -1 displacements of 490 pairs | 1,000,000 | `straight`, `plus1`, `minus1` | `mcrx.RData` | Example 2 |
+| `random_org_digits.npz` | random.org digits | random.org | digit matching, 268 pairs, p = 1/10, displacements +1 to +7 and -1 to -7 | 1,108,074 | `straight`, `plus1`..`plus7`, `minus1`..`minus7` | `randorgorigA.RData` | Example 3 |
+| `random_org_125.npz` | Short series | random.org | morning-afternoon, 125 + 125 | 2,266,000 | hits in each half (of 125) | `randmorn.RData` | not used |
+| `other_runs.npz` | Unlabelled runs | not recorded | morning-afternoon, 250 + 250 | 1,000,000 and 255,732 | `mcr_*`, `aao1rng_*` | `mcr.RData`, `aao1rng.RData` | not used |
+
+`random_org_files.txt` lists the 2,266 daily random.org files used by the main series, 12 March 2006 to 4 August 2012, in order. Each 1 MiB file supplied 16,777 experiments (8,388,500 bits), so experiment *i* comes from file *i* // 16,777.
+
+Load any series with numpy:
+
+```python
+import numpy as np
+m = np.load('data/random_org_main_morning.npz')['morning']      # hits out of 250
+a = np.load('data/random_org_main_afternoon.npz')['afternoon']
+x = m.astype(int) - a + 250                                      # exactly Binomial(500, 1/2) under chance
+```
+
+### Scores
+
+For the morning-afternoon design, with *M* and *A* the morning and afternoon hits, Spencer-Brown's critical ratio is CR = (*M* - *A*) / sqrt(125). Because 250 - *A* has the same distribution as *A*, *X* = *M* - *A* + 250 is exactly Binomial(500, 1/2), the same as one experiment of 500 trials. The total *M* + *A* has the same distribution and is analysed too.
+
+For digit matching, hits are Binomial(*n*, 1/10) with *n* = 500, 490 or 268, and CR = (*X* - *np*) / sqrt(*np*(1 - *p*)).
+
+### Provenance and data quality
+
+- The original workspaces stored critical ratios, not hit counts. `extract.py` recovers the integer counts exactly and checks that every recovered value is a whole number.
+- `Spencp.RData`, the copy of the main series used for the 2012 analysis and the first CHANCE submission, has about 0.005% of its stored values corrupted in blocks of roughly a thousand (0 morning, 475 afternoon and 892 difference values), probably by memory or disk errors. `rand1.RData` holds an intact copy of the same experiments, and every undamaged value in `Spencp.RData` agrees with it. The data here come from `rand1.RData`. Counts in Table 1 differ from those computed from the corrupted copy by at most six.
+- No experiment was excluded. The main series is exactly 2,266 files x 16,777 experiments.
+- The 2012 analysis computed p-values as `2*pnorm(-abs(cr))`, that is, from the normal approximation. That choice produced the apparent anomaly.
+- The source of the two runs in `other_runs.npz` was not recorded. They are included for completeness, and they fit the binomial as well as the rest.
+- Not included: a few workspaces holding a variant design after Stevens (`mmmmm`, `multi`, `rand2`), which was not analysed, and test or partial workspaces.
+
+The original `.RData` files (about 460 MB) are available from the author.
+
+## Reproducing the results
+
+Python 3.9 or later.
+
+```
+pip install -r requirements.txt
+python code/analyse.py                    # a minute or two; writes results/summary.md and CSVs
+python code/extra_checks.py               # writes results/extra_checks.md
+python code/iversen_check.py 2000 1000    # about 3 minutes; results/iversen_battery.txt
+```
+
+To rebuild `data/` from the original workspaces: `python code/extract.py /folder/with/RData/files`.
+
+`iversen_check.py` uses a fixed seed (2026), so it reproduces `results/iversen_battery.txt` exactly.
+
+## Main results
+
+Full tables are in `results/summary.md` and `results/extra_checks.md`.
+
+- **Main series, against the exact binomial.** At the seven thresholds in Table 1 (|CR| >= 2.0 to 5.0), no count differs from its exact expectation by more than 1.1 standard errors. Across fifteen thresholds the largest discrepancy is 2.1% at 3.5 (2.6 SE); a discrepancy that large somewhere among the fifteen occurs in 9% of simulated binomial series.
+- **Main series, against the normal approximation.** Errors run in both directions: 10% too few extremes predicted at |CR| >= 2.5, 13% too many at 2.6. The sign reverses roughly every 0.85 in the threshold, because the lattice of possible CRs (spacing 0.0894) drifts against a 0.1 grid of thresholds.
+- **Every series** fits the exact binomial: variances within 0.3%, counts of |CR| >= 3 within 3%. Three of 35 chi-square fits give p < .05 (1.75 expected). The poorest, the +6 displacement of the random.org digits, has p = .001.
+- **Digit matching (p = 1/10).** The normal curve badly undercounts the upper tail. At CR >= 3.5 the Entropy Key gave 461 experiments (exact 455, normal 233) and the random.org digits 835 (exact 832, normal 258).
+- **Does the standard error vary?** No. The daily variances are exactly as dispersed as chance predicts (p = .49), and the kurtosis of the total score limits any experiment-to-experiment variation in the standard error to about 1%. The difference score shows a small central excess (z = 3.0 within one hit of *M* = *A*) not shared by the total score; it is reported in `results/extra_checks.md`.
+- **Iversen et al. (1971).** Their test battery is well calibrated under ideal randomness. Their dice (16 extreme scores, 12.5 expected, P = .21) and pseudo-random series (5, 3.15 expected, P = .22) are within chance. Only the RAND digits are unusual (10, P = .004).
+
+## Use of AI tools
+
+The re-analysis, the code and the drafting of both papers were carried out with the assistance of Claude (Anthropic). The author directed the work and supplied the original data.

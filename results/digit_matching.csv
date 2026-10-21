@@ -1,0 +1,13 @@
+series,t,observed,normal,exact,obs_over_normal,obs_over_exact
+"Entropy Key, straight, 500 pairs",2.0,43689,45500.3,43685.7,0.96,1.0
+"Entropy Key, straight, 500 pairs",2.5,13872,12419.3,13776.3,1.117,1.007
+"Entropy Key, straight, 500 pairs",3.0,2320,2699.8,2325.9,0.859,0.997
+"Entropy Key, straight, 500 pairs",3.5,532,465.3,529.1,1.143,1.005
+"Entropy Key, straight, 500 pairs",4.0,111,63.3,109.2,1.752,1.017
+"Entropy Key, straight, 500 pairs",4.5,11,6.8,11.6,1.619,0.951
+"random.org, straight, 268 pairs",2.0,45912,50417.7,46144.4,0.911,0.995
+"random.org, straight, 268 pairs",2.5,11564,13761.5,11675.2,0.84,0.99
+"random.org, straight, 268 pairs",3.0,3505,2991.6,3461.0,1.172,1.013
+"random.org, straight, 268 pairs",3.5,867,515.5,869.9,1.682,0.997
+"random.org, straight, 268 pairs",4.0,118,70.2,123.2,1.681,0.958
+"random.org, straight, 268 pairs",4.5,26,7.5,29.3,3.453,0.886

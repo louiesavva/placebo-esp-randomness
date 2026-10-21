@@ -1,0 +1,12 @@
+quantity,observed,expected,test
+mean of difference,"-0.00113","0","-0.63"
+variance of difference,"124.9633","125","-1.28"
+excess kurtosis of difference,"-0.00215","-0.0040 (binomial); 0 (normal)","+2.33 vs binomial; -2.71 vs normal"
+excess kurtosis, morning,"-0.00804","-0.0080","-0.05"
+excess kurtosis, afternoon,"-0.00750","-0.0080","+0.63"
+experiments scoring exactly 0,"1,358,765","1,355,851","+2.55"
+chi-square, whole distribution,"121.5 on 112 df","","p = 0.254"
+spread of daily variances (2266 days),"SD 1.364","SD 1.363","dispersion 2267 on 2266 df, p = 0.49"
+spread of daily means,"2290","2266 df","p = 0.36"
+corr(morning, afternoon),"+0.000093","0","+0.57"
+corr(morning^2, afternoon^2),"+0.000197","0","+1.22"
