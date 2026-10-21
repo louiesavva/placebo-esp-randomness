@@ -49,13 +49,18 @@ def texts(folder):
                             yield os.path.basename(member.name), t.extractfile(member).read()
 
 
+folder = os.path.abspath(os.path.expanduser(sys.argv[1] if len(sys.argv) > 1 else '.'))
+if not os.path.isdir(folder):
+    sys.exit(f'No such folder: {folder}')
+print(f'Searching {folder}')
 seen, mismatched = set(), []
-for name, raw in texts(sys.argv[1] if len(sys.argv) > 1 else '.'):
+for name, raw in texts(folder):
     if name not in index or name in seen:
         continue
     bits = np.frombuffer(raw, dtype=np.uint8) - ord('0')
     if len(bits) != SKIP + USED + 1 or bits.max() > 1:
-        print(f'{name}: not a random.org text file of 8,388,608 bits; skipped')
+        print(f'{name}: not a complete random.org text file of 8,388,608 bits '
+              f'(still downloading?); skipped')
         continue
     seen.add(name)
     counts = bits[SKIP:SKIP + USED].reshape(PER_FILE, 2, 250).sum(axis=2)
