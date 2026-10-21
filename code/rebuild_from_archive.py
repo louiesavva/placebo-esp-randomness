@@ -12,10 +12,12 @@ time, the first 250 of each block as the morning hits and the next 250 as the af
 hits. The first 107 characters and the last one were not used. This rule was established
 by comparing the archive file for 17 June 2012 with the bits of that day saved in 2012.
 
-The folder may hold the .txt files themselves or .zip files containing them. Files whose
-dates are not in data/random_org_files.txt are ignored.
+The folder is searched recursively. It may hold the daily .txt files themselves, or .zip,
+.tgz or .tar.gz archives containing them (such as random.org's monthly archives). Files
+whose dates are not in data/random_org_files.txt are ignored. With all 2,266 files present,
+the script checks every one of the 38,016,682 experiments.
 """
-import os, sys, zipfile
+import os, sys, tarfile, zipfile
 import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -29,29 +31,52 @@ a = np.load(os.path.join(DATA, 'random_org_main_afternoon.npz'))['afternoon']
 
 
 def texts(folder):
-    for name in sorted(os.listdir(folder)):
-        path = os.path.join(folder, name)
-        if name.endswith('.txt'):
-            yield name, open(path, 'rb').read()
-        elif name.endswith('.zip'):
-            with zipfile.ZipFile(path) as z:
-                for member in z.namelist():
-                    if member.endswith('.txt'):
-                        yield os.path.basename(member), z.read(member)
+    """Yield (file name, contents) for every random.org text file under folder."""
+    for root, _, names in os.walk(folder):
+        for name in sorted(names):
+            path = os.path.join(root, name)
+            if name.endswith('.txt'):
+                yield name, open(path, 'rb').read()
+            elif name.endswith('.zip'):
+                with zipfile.ZipFile(path) as z:
+                    for member in z.namelist():
+                        if member.endswith('.txt'):
+                            yield os.path.basename(member), z.read(member)
+            elif name.endswith(('.tgz', '.tar.gz')):
+                with tarfile.open(path) as t:
+                    for member in t.getmembers():
+                        if member.isfile() and member.name.endswith('.txt'):
+                            yield os.path.basename(member.name), t.extractfile(member).read()
 
 
-checked = matched = 0
+seen, mismatched = set(), []
 for name, raw in texts(sys.argv[1] if len(sys.argv) > 1 else '.'):
-    if name not in index:
+    if name not in index or name in seen:
         continue
     bits = np.frombuffer(raw, dtype=np.uint8) - ord('0')
     if len(bits) != SKIP + USED + 1 or bits.max() > 1:
         print(f'{name}: not a random.org text file of 8,388,608 bits; skipped')
         continue
+    seen.add(name)
     counts = bits[SKIP:SKIP + USED].reshape(PER_FILE, 2, 250).sum(axis=2)
     k = index[name] * PER_FILE
-    same = np.array_equal(counts[:, 0], m[k:k + PER_FILE]) and np.array_equal(counts[:, 1], a[k:k + PER_FILE])
-    checked += 1; matched += same
-    print(f'{name}: experiments {k:,} to {k + PER_FILE - 1:,} (from 0) rebuilt; identical to data/: {same}')
-print(f'{matched} of {checked} files rebuilt identically.')
-sys.exit(0 if checked and matched == checked else 1)
+    same_m = counts[:, 0] == m[k:k + PER_FILE]
+    same_a = counts[:, 1] == a[k:k + PER_FILE]
+    bad = int((~(same_m & same_a)).sum())
+    if bad:
+        mismatched.append((name, bad))
+        print(f'{name}: {bad:,} of {PER_FILE:,} experiments differ from data/')
+    elif len(seen) % 100 == 0:
+        print(f'{len(seen):,} files checked, all identical so far')
+
+ok = len(seen) - len(mismatched)
+print(f'\nFiles found: {len(seen):,} of {len(files):,}. Rebuilt identically: {ok:,}. '
+      f'Experiments checked: {len(seen) * PER_FILE:,} of {len(files) * PER_FILE:,}.')
+missing = [f for f in files if f not in seen]
+if missing and len(missing) <= 20:
+    print('Not found: ' + ', '.join(missing))
+elif missing:
+    print(f'Not found: {len(missing):,} files, from {missing[0]} to {missing[-1]}')
+for name, bad in mismatched:
+    print(f'DIFFERS: {name} ({bad:,} experiments)')
+sys.exit(0 if seen and not mismatched else 1)
