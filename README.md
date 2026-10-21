@@ -57,7 +57,8 @@ For digit matching, hits are Binomial(*n*, 1/10) with *n* = 500, 490 or 268, and
 - **Where the main series comes from.** `rand1.RData`. An older copy of the same experiments, `Spencp.RData`, has about 0.005% of its values damaged, probably by memory or disk errors. It is used only for the list of random.org files and as a cross-check (its undamaged values agree exactly), and it is why counts in the 2012 analysis differ from Table 1 by up to six.
 - **What went wrong in 2012.** The original analysis computed p-values as `2*pnorm(-abs(cr))`, the normal approximation. That is the source of the apparent anomaly.
 - **Unrecorded source.** The source of the two runs in `other_runs.npz` was not recorded. They are included for completeness and fit the binomial as well as the rest.
-- **Not included.** Workspaces for a variant design after Stevens (`mmmmm`, `multi`, `rand2`), which has not been analysed, and test or partial workspaces. The original `.RData` files (about 460 MB) are available from the author.
+
+The original `.RData` files (about 460 MB) are available from the author.
 
 ## Reproducing the results
 
