@@ -2,8 +2,8 @@
 
 Data and code for two papers by Louie Savva:
 
-- *Anomalous Significance Revisited: Forty Million Placebo Experiments and the Shape of Chance* (journal manuscript, 2026)
-- *Too Many Miracles* (submitted to *CHANCE*, UCHA-2026-0014)
+- *Anomalous Significance Revisited: Forty Million Placebo Experiments and the Shape of Chance* (research paper, in preparation)
+- *Too Many Miracles* (non-technical article, under review)
 
 Between 2006 and 2013 the author ran tens of millions of placebo "ESP" experiments, in which random numbers stood in for both the target and the guess, so no psi was possible. An analysis in 2012 found too many extreme critical ratios and took this as evidence that real random sources misbehave in their tails. That conclusion was wrong. The excess is real when the counts are judged against the normal approximation to the binomial, and disappears when they are judged against the exact binomial. This repository holds every experiment's hit counts, the code that recovered them from the original R workspaces, and the code for every table in both papers.
 
@@ -52,7 +52,7 @@ For digit matching, hits are Binomial(*n*, 1/10) with *n* = 500, 490 or 268, and
 ### Provenance and data quality
 
 - The original workspaces stored critical ratios, not hit counts. `extract.py` recovers the integer counts exactly and checks that every recovered value is a whole number.
-- `Spencp.RData`, the copy of the main series used for the 2012 analysis and the first CHANCE submission, has about 0.005% of its stored values corrupted in blocks of roughly a thousand (0 morning, 475 afternoon and 892 difference values), probably by memory or disk errors. `rand1.RData` holds an intact copy of the same experiments, and every undamaged value in `Spencp.RData` agrees with it. The data here come from `rand1.RData`. Counts in Table 1 differ from those computed from the corrupted copy by at most six.
+- `Spencp.RData`, the copy of the main series used for the 2012 analysis and an earlier draft of these papers, has about 0.005% of its stored values corrupted in blocks of roughly a thousand (0 morning, 475 afternoon and 892 difference values), probably by memory or disk errors. `rand1.RData` holds an intact copy of the same experiments, and every undamaged value in `Spencp.RData` agrees with it. The data here come from `rand1.RData`. Counts in Table 1 differ from those computed from the corrupted copy by at most six.
 - No experiment was excluded. The main series is exactly 2,266 files x 16,777 experiments.
 - The 2012 analysis computed p-values as `2*pnorm(-abs(cr))`, that is, from the normal approximation. That choice produced the apparent anomaly.
 - The source of the two runs in `other_runs.npz` was not recorded. They are included for completeness, and they fit the binomial as well as the rest.
