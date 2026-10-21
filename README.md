@@ -52,7 +52,7 @@ For digit matching, hits are Binomial(*n*, 1/10) with *n* = 500, 490 or 268, and
 ### Provenance and data quality
 
 - The original workspaces stored critical ratios, not hit counts. `extract.py` recovers the integer counts exactly and checks that every recovered value is a whole number.
-- `Spencp.RData`, the copy of the main series used for the 2012 analysis and an earlier draft of these papers, has about 0.005% of its stored values corrupted in blocks of roughly a thousand (0 morning, 475 afternoon and 892 difference values), probably by memory or disk errors. `rand1.RData` holds an intact copy of the same experiments, and every undamaged value in `Spencp.RData` agrees with it. The data here come from `rand1.RData`. Counts in Table 1 differ from those computed from the corrupted copy by at most six.
+- Everything in `data/` is a single, canonical copy of each series, checked to contain only whole-number counts. The main series comes from `rand1.RData`. An older saved copy of the same experiments, `Spencp.RData`, has a few damaged values (about 0.005%, probably from memory or disk errors). It is not used for any result here; `extract.py` reads it only for the list of random.org files and to confirm that its undamaged values match. The damage explains why counts from the 2012 analysis differ from Table 1 by up to six.
 - No experiment was excluded. The main series is exactly 2,266 files x 16,777 experiments.
 - The 2012 analysis computed p-values as `2*pnorm(-abs(cr))`, that is, from the normal approximation. That choice produced the apparent anomaly.
 - The source of the two runs in `other_runs.npz` was not recorded. They are included for completeness, and they fit the binomial as well as the rest.
