@@ -140,6 +140,27 @@ for day in ('2012-06-17', '2012-08-04'):
               f'{(runs - er) / np.sqrt((nb - 1) / 4):+.2f} | {(x[1:] * x[:-1]).mean():+.5f} ({1 / np.sqrt(nb):.5f}) |')
 md += ['']
 
+# ---- 6. without the days with odd bit-level statistics ------------------------
+# results/sequential_checks.md finds a handful of days whose bits show small correlations
+# between neighbouring bits. Table 1 is recomputed without them as a sensitivity check.
+ODD = ['2012-01-04', '2011-09-20', '2008-04-19', '2011-06-27', '2011-10-13', '2007-04-29']
+keep = np.ones(N, bool)
+for day in ODD:
+    k = files.index(day + '.txt') * 16777
+    keep[k:k + 16777] = False
+Dk = D[keep]; Nk = len(Dk)
+cnt_k = np.bincount(np.abs(Dk), minlength=251)
+md += ['## 6. Without the six days with odd bit-level statistics', '',
+       f'Days left out: {", ".join(ODD)} ({N - Nk:,} experiments, {(N - Nk) / N:.2%}).', '',
+       '| t | z, all days | z, without the six days | change |', '|---|---|---|---|']
+for t, L, zz in zip(ts, lims, z):
+    e = Nk * absp[L:].sum(); zk = (cnt_k[L:].sum() - e) / np.sqrt(e * (1 - e / Nk))
+    md.append(f'| {t} | {zz:+.2f} | {zk:+.2f} | {zk - zz:+.2f} |')
+pc = pm[249:252].sum()
+zc_k = (int((np.abs(Dk) <= 1).sum()) - Nk * pc) / np.sqrt(Nk * pc * (1 - pc))
+md += ['', f'Excess within one hit of M = A: z = {z1:.2f} with all days, {zc_k:.2f} without the six. '
+       f'Variance of M - A: {D.var():.4f} with all days, {Dk.var():.4f} without (binomial 125).', '']
+
 with open(os.path.join(OUT, 'extra_checks.md'), 'w') as fh:
     fh.write('\n'.join(md) + '\n')
 print('\n'.join(md))
