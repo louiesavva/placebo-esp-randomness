@@ -100,3 +100,27 @@ Correlation between the runs z scores of consecutive days (in date order): -0.00
 | 2008-12-19 | +3.49 | -0.74 |
 | 2009-01-22 | +3.22 | -1.56 |
 | 2010-06-17 | -3.13 | +0.75 |
+
+## Follow-up from the per-day scores
+
+Computed from results/sequential_by_day.csv (written by the same run).
+
+| day | lag-2 z | runs z |
+|---|---|---|
+| 2012-01-04 | -8.18 | +25.33 |
+| 2008-04-19 | +7.60 | -0.46 |
+| 2007-04-29 | -4.81 | +0.20 |
+| 2007-01-16 | +3.86 | -0.38 |
+| 2008-07-14 | +3.46 | -0.19 |
+| 2009-09-26 | +3.42 | -0.22 |
+| 2010-11-18 | +3.13 | -0.77 |
+| 2011-09-20 | -3.11 | +9.35 |
+| 2011-05-28 | -3.11 | +0.87 |
+| 2009-02-26 | -3.11 | +2.67 |
+
+The ten days with the most extreme lag-2 scores. Leaving out the four days with the most extreme runs scores
+(2012-01-04, 2011-09-20, 2011-06-27, 2011-10-13), the mean squared z is 1.053 for the runs (excess 1.8 standard
+errors) and 1.082 for lag 2 (excess 2.8); leaving out 2008-04-19 and 2007-04-29 as well brings lag 2 to about 1.05
+(excess about 1.6). Across days, the runs and lag-2 scores are almost uncorrelated (r = -0.10). A z score of z on
+n pairs corresponds to a correlation of about z / sqrt(n) (sqrt(8,388,499) = 2,896), so 4 January 2012 had
+correlations of about -0.009 at lag 1 and -0.003 at lag 2.
