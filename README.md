@@ -1,6 +1,6 @@
 # Placebo ESP experiments and the normal approximation
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23541088.svg)](https://doi.org/10.5281/zenodo.23541088)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23551992.svg)](https://doi.org/10.5281/zenodo.23551992)
 
 Data and code for two papers by Louie Savva:
 
@@ -116,9 +116,9 @@ Full tables are in `results/summary.md` and `results/extra_checks.md`.
 
 Code (`code/`): MIT licence, see `LICENSE`. Data and results (`data/`, `results/`): CC BY 4.0, see `LICENSE-DATA`.
 
-Please cite as: Savva, L. (2026). *Placebo ESP experiments: data and code* (Version 1.0.0) [Data set]. Zenodo. https://doi.org/10.5281/zenodo.23541088
+Please cite as: Savva, L. (2026). *Placebo ESP experiments: data and code* (Version 1.0.1) [Data set]. Zenodo. https://doi.org/10.5281/zenodo.23551992
 
-Version 1.0.0 is archived permanently at Zenodo; this repository is where the data and code are maintained.
+Version 1.0.1 is archived permanently at Zenodo (version 1.0.0, with the same data: https://doi.org/10.5281/zenodo.23541088); this repository is where the data and code are maintained.
 
 ## Use of AI tools
 
